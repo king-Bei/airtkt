@@ -1,0 +1,7 @@
+{
+  "name": "SkyBound Flight Booking Pro",
+  "description": "A high-end flight search and booking system with integrated AI-driven flight simulation, administrative pricing controls, and customer order management.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
