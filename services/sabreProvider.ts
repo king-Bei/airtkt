@@ -1,5 +1,5 @@
 
-import { SearchParams, Flight } from '../types';
+import { SearchParams, Flight, FlightSegment } from '../types';
 import { db } from './db';
 
 const OFFICIAL_BASE_URL = 'https://api.test.sabre.com';
@@ -7,7 +7,6 @@ const OFFICIAL_BASE_URL = 'https://api.test.sabre.com';
 export const sabreProvider = {
   generateRequestId: () => `SABRE-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
 
-  // 取得基礎 URL，優先使用使用者配置的 Bridge (解決 CORS 問題)
   getBaseUrl: () => {
     const creds = db.getCredentials();
     return creds.sabreBridgeUrl || OFFICIAL_BASE_URL;
@@ -20,9 +19,8 @@ export const sabreProvider = {
 
     const baseUrl = sabreProvider.getBaseUrl();
     const encoded = btoa(`${creds.sabreClientId}:${creds.sabreClientSecret}`);
-    
+
     try {
-      // 如果使用 Bridge，API 路徑可能有所不同，這裡保持標準 REST 路徑
       const response = await fetch(`${baseUrl}/v1/auth/token`, {
         method: 'POST',
         headers: {
@@ -32,7 +30,7 @@ export const sabreProvider = {
         },
         body: 'grant_type=client_credentials'
       });
-      
+
       if (!response.ok) {
         const err = await response.text();
         console.error("[Sabre Auth Error]", response.status, err);
@@ -41,7 +39,7 @@ export const sabreProvider = {
       const data = await response.json();
       return data.access_token;
     } catch (e) {
-      console.error("[Sabre Auth Network Error] 這通常是因為瀏覽器 CORS 限制。請在後台配置 Sabre Bridge URL (如您的 Java Bridge 地址)。", e);
+      console.error("[Sabre Auth Network Error] Check your CORS or Bridge URL settings.", e);
       return null;
     }
   },
@@ -51,6 +49,7 @@ export const sabreProvider = {
     if (!token) return [];
 
     const baseUrl = sabreProvider.getBaseUrl();
+    // BFM Request Structure
     const payload = {
       OTA_AirLowFareSearchRQ: {
         Version: "4.3.0",
@@ -81,17 +80,81 @@ export const sabreProvider = {
       });
 
       if (!response.ok) {
-        console.error("[Sabre Search Error]", response.status);
+        console.error("[Sabre Search Error] Status:", response.status);
         return [];
       }
-      
+
       const data = await response.json();
-      
-      // 解析邏輯 (略，根據實務返回資料 Mapping)
-      if (!data.groupedItineraryResponse) return [];
-      
-      // 這裡僅作示意：從 Bridge 獲取的資料解析
-      return []; 
+      const groupedItineraryResponse = data.groupedItineraryResponse;
+
+      if (!groupedItineraryResponse) return [];
+
+      const scheduleDescs = groupedItineraryResponse.scheduleDescs; // Map of schedules
+      const legDescs = groupedItineraryResponse.legDescs; // Map of legs
+      const itineraryGroups = groupedItineraryResponse.itineraryGroups;
+
+      if (!itineraryGroups || itineraryGroups.length === 0) return [];
+
+      const flights: Flight[] = [];
+
+      // Iterate through groups (usually grouped by brand/leg)
+      itineraryGroups.forEach((group: any) => {
+        const itineraries = group.itineraries;
+        if (!itineraries) return;
+
+        itineraries.forEach((itinerary: any) => {
+          // Pricing Information
+          const totalFare = itinerary.pricingSourceAdjustment?.[0]?.totalFare || group.groupDescription?.legend?.totalFare;
+          // If we can't find price, skip
+          if (!itinerary.totalFare && !totalFare) return;
+
+          const price = itinerary.totalFare?.TotalPrice || totalFare?.TotalPrice;
+          if (!price) return;
+
+          // Helper to build segments
+          const segments: FlightSegment[] = [];
+          const legs = itinerary.legs; // Array of leg references
+
+          legs.forEach((legRef: any) => {
+            const legDesc = legDescs.find((l: any) => l.id === legRef.ref);
+            if (!legDesc) return;
+
+            legDesc.schedules.forEach((scheduleRef: any) => {
+              const schedule = scheduleDescs.find((s: any) => s.id === scheduleRef.ref);
+              if (!schedule) return;
+
+              segments.push({
+                airline: schedule.carrier.marketing, // Code
+                airlineCode: schedule.carrier.marketing,
+                flightNumber: `${schedule.carrier.marketing}${schedule.carrier.marketingFlightNumber}`,
+                departureAirport: schedule.departure.airport,
+                departureAirportName: schedule.departure.airport,
+                departureTerminal: schedule.departure.terminal,
+                arrivalAirport: schedule.arrival.airport,
+                arrivalAirportName: schedule.arrival.airport,
+                arrivalTerminal: schedule.arrival.terminal,
+                departureTime: schedule.departure.time, // Format usually: 2023-10-25T10:00:00
+                arrivalTime: schedule.arrival.time,
+                duration: (schedule.elapsedTime || 0).toString()
+              });
+            });
+          });
+
+          flights.push({
+            id: `SAB-${itinerary.id}`,
+            provider: 'Sabre',
+            basePrice: price, // Simplified, usually need to parse EquivFare
+            totalPrice: price,
+            currency: 'TWD', // Assuming TWD or parsing it from "TWD12345"
+            class: params.class,
+            baggageAllowance: '23KG', // Default fallback, BFM Baggage is complex
+            availableSeats: 9, // BFM usually implies available if returned
+            segments
+          });
+        });
+      });
+
+      return flights;
     } catch (e) {
       console.error("[Sabre Search Network Error]", e);
       return [];

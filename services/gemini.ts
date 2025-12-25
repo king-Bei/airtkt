@@ -2,10 +2,11 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Flight, SearchParams, FlightClass, TripType } from "../types";
 import { db } from "./db";
-import { externalProviders } from "./externalApis";
+import { amadeusProvider } from "./amadeusProvider";
 
 const MOCK_AIRLINES = [
   { code: 'BR', name: '長榮航空' },
+  // ... (start line 8)
   { code: 'CI', name: '中華航空' },
   { code: 'CX', name: '國泰航空' },
   { code: 'JL', name: '日本航空' },
@@ -21,7 +22,7 @@ export const flightService = {
     const destination = isReturn ? params.origin : params.destination;
     const date = isReturn ? params.returnDate : params.date;
     const pricingRules = db.getPricingRules();
-    
+
     return Array.from({ length: 4 }).map((_, i) => {
       const airline = MOCK_AIRLINES[Math.floor(Math.random() * MOCK_AIRLINES.length)];
       const basePrice = 8000 + Math.floor(Math.random() * 25000);
@@ -29,7 +30,7 @@ export const flightService = {
       // Use markupAmount for percentage logic if markupType is percent
       const markupPercent = rule.markupType === 'percent' ? rule.markupAmount : 0;
       const markup = 1 + (markupPercent / 100);
-      
+
       const hour = 7 + (i * 3);
       const depTime = `${date}T${hour.toString().padStart(2, '0')}:30:00`;
       const arrTime = `${date}T${(hour + 3).toString().padStart(2, '0')}:45:00`;
@@ -64,7 +65,7 @@ export const flightService = {
   parseNaturalLanguageInput: async (text: string, imageBase64?: string): Promise<Partial<SearchParams>> => {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const model = 'gemini-3-flash-preview';
-    
+
     const prompt = `你是一個專業的旅遊票務助手。請從提供的內容中提取：tripType, origin, destination, date, returnDate, adults, class。
     現在日期是 ${new Date().toISOString().split('T')[0]}。
     城市請轉換為 3 碼 IATA。回傳純 JSON。`;
@@ -92,11 +93,11 @@ export const flightService = {
     const pricingRules = db.getPricingRules();
 
     let allFlights: Flight[] = [];
-    
+
     // 1. 嘗試從 Amadeus 獲取真實資料
     if (!isReturn && creds.amadeusClientId) {
       try {
-        const amadeusFlights = await externalProviders.searchAmadeus(params);
+        const amadeusFlights = await amadeusProvider.search(params);
         allFlights = [...allFlights, ...amadeusFlights];
       } catch (e) { console.error("Amadeus error"); }
     }
