@@ -33,25 +33,31 @@ public class AirportService {
 	private MultiPoint coordinates;
 	
 	@PostConstruct
-	void loadStream() throws IOException{		
+	void loadStream() {		
 		try (Stream<String> stream = Files.lines(Paths.get(new ClassPathResource("airports.csv").getFile().getPath()), StandardCharsets.UTF_8)) {
 			stream.forEach(s -> {
 				airportsOrginalList.add(s);	
 				airportsStandardizedList.add(s.toLowerCase());
 			});	
+		} catch (Exception e) {
+			System.err.println("Failed to load airports.csv: " + e.getMessage());
 		}
 	}
 	
 	@PostConstruct
-	void loadCoordiate() throws IOException {		
-		List<Point> coordiateList = new ArrayList<Point>();
-		try (Stream<String> stream = Files.lines(Paths.get(new ClassPathResource("airports.csv").getFile().getPath()), StandardCharsets.UTF_8)) {
-			stream.forEach(s ->{
-				String[] result = s.split(";");	
-				airports.add(new Airport(result[0], result[1], result[2], result[3], result[4], result[5]));	
-				coordiateList.add(geometryFactory.createPoint(new Coordinate(Double.valueOf(result[4]),Double.valueOf(result[5]))));
-			});		
-			coordinates = geometryFactory.createMultiPoint(coordiateList.toArray(new Point[coordiateList.size()]));
+	void loadCoordiate() {		
+		try {
+			List<Point> coordiateList = new ArrayList<Point>();
+			try (Stream<String> stream = Files.lines(Paths.get(new ClassPathResource("airports.csv").getFile().getPath()), StandardCharsets.UTF_8)) {
+				stream.forEach(s ->{
+					String[] result = s.split(";");	
+					airports.add(new Airport(result[0], result[1], result[2], result[3], result[4], result[5]));	
+					coordiateList.add(geometryFactory.createPoint(new Coordinate(Double.valueOf(result[4]),Double.valueOf(result[5]))));
+				});		
+				coordinates = geometryFactory.createMultiPoint(coordiateList.toArray(new Point[coordiateList.size()]));
+			}
+		} catch (Exception e) {
+			System.err.println("Failed to load coordinates: " + e.getMessage());
 		}		
 	}
 	

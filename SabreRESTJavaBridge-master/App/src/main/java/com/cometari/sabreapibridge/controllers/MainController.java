@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import com.cometari.sabreapibridge.domain.Airport;
 import com.cometari.sabreapibridge.services.AirportService;
@@ -23,6 +24,7 @@ import com.cometari.sabreapibridge.services.SabreAPIService;
 
 @Controller
 @RequestMapping("")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class MainController {
 	
 	static Logger log = Logger.getLogger(MainController.class.getName());
@@ -53,6 +55,11 @@ public class MainController {
 		String redirectURL = request.getServletPath().toString()+"?"+request.getQueryString();
 		redirectURL = redirectURL.replace("/api/", "");
 		return sabreAPIService.postRequest(redirectURL, requestBody);
+	}
+	
+	@RequestMapping(value="api/**", method = RequestMethod.OPTIONS)
+	public ResponseEntity<?> optionsMethod() {
+		return new ResponseEntity<Object>(HttpStatus.OK);
 	}
 	
 	@RequestMapping(value="airports", params={"text"}, method = RequestMethod.GET)	

@@ -9,7 +9,7 @@ const AdminDashboard: React.FC = () => {
   const [bookings, setBookings] = useState<Booking[]>(db.getBookings());
   const [rules, setRules] = useState<PricingRule[]>(db.getPricingRules());
   const [creds, setCreds] = useState<ApiCredentials>(db.getCredentials());
-  
+
   const [showAddModal, setShowAddModal] = useState(false);
   const [newRule, setNewRule] = useState<Partial<PricingRule>>({
     airlineCode: '',
@@ -59,7 +59,7 @@ const AdminDashboard: React.FC = () => {
         {[
           { id: 'orders', label: '訂單管理', icon: <Icons.Clipboard /> },
           { id: 'pricing', label: '利潤與供應商規則', icon: <Icons.Settings /> },
-          { id: 'gds', label: 'API 連線設定', icon: <Icons.Plane /> }
+          { id: 'pricing', label: '利潤與供應商規則', icon: <Icons.Settings /> }
         ].map(tab => (
           <button
             key={tab.id}
@@ -89,9 +89,9 @@ const AdminDashboard: React.FC = () => {
                   <tr key={b.id} className="hover:bg-slate-50/20 transition-colors">
                     <td className="py-6 font-black text-[#5D2A8E]">{b.pnr}</td>
                     <td className="py-6">
-                       <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${b.flight.provider === 'Amadeus' ? 'bg-purple-100 text-purple-700' : 'bg-orange-100 text-orange-700'}`}>
-                         {b.flight.provider}
-                       </span>
+                      <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${b.flight.provider === 'Amadeus' ? 'bg-purple-100 text-purple-700' : 'bg-orange-100 text-orange-700'}`}>
+                        {b.flight.provider}
+                      </span>
                     </td>
                     <td className="py-6 text-xs">{b.passengers[0].lastName} {b.passengers[0].firstName}</td>
                     <td className="py-6 font-black">${b.totalAmount.toLocaleString()}</td>
@@ -108,127 +108,75 @@ const AdminDashboard: React.FC = () => {
 
         {activeTab === 'pricing' && (
           <div className="space-y-10">
-             <div className="flex justify-between items-center bg-slate-50 p-6 rounded-3xl">
-                <div>
-                  <h3 className="text-xl font-black italic uppercase text-[#5D2A8E]">Markup Policy.</h3>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">您可以為不同 GDS 設定專屬的價格策略</p>
-                </div>
-                <button onClick={() => setShowAddModal(true)} className="bg-[#5D2A8E] text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase shadow-lg">新增加價規則</button>
-             </div>
-             
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {rules.map(rule => (
-                  <div key={rule.id} className="p-8 border-2 border-slate-50 rounded-[2.5rem] hover:border-[#A5D8E6] transition-all relative bg-white group">
-                     <button onClick={() => handleDeleteRule(rule.id)} className="absolute top-6 right-6 text-slate-200 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                       <Icons.QrCode /> 
-                     </button>
-                     <div className="mb-4">
-                        <span className={`text-[7px] font-black px-2.5 py-1 rounded-full text-white uppercase tracking-tighter ${rule.provider === 'Amadeus' ? 'bg-[#5D2A8E]' : rule.provider === 'Sabre' ? 'bg-[#E68A5C]' : 'bg-slate-300'}`}>
-                          {rule.provider || '通用 (All GDS)'}
-                        </span>
-                     </div>
-                     <p className="text-[10px] font-black text-[#5D2A8E] uppercase tracking-widest">{rule.airlineCode === 'DEFAULT' ? '不限航空公司' : `航司: ${rule.airlineCode}`}</p>
-                     <p className="text-4xl font-black text-slate-900 mt-2 italic">
-                       {rule.markupType === 'percent' ? `+${rule.markupAmount}%` : `+${rule.markupAmount}`}
-                       <span className="text-xs font-bold text-slate-400 not-italic ml-1">{rule.markupType === 'percent' ? '' : 'TWD'}</span>
-                     </p>
-                     <p className="text-[9px] font-bold text-slate-300 uppercase mt-2 tracking-widest">{rule.flightClass}</p>
+            <div className="flex justify-between items-center bg-slate-50 p-6 rounded-3xl">
+              <div>
+                <h3 className="text-xl font-black italic uppercase text-[#5D2A8E]">Markup Policy.</h3>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">您可以為不同 GDS 設定專屬的價格策略</p>
+              </div>
+              <button onClick={() => setShowAddModal(true)} className="bg-[#5D2A8E] text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase shadow-lg">新增加價規則</button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {rules.map(rule => (
+                <div key={rule.id} className="p-8 border-2 border-slate-50 rounded-[2.5rem] hover:border-[#A5D8E6] transition-all relative bg-white group">
+                  <button onClick={() => handleDeleteRule(rule.id)} className="absolute top-6 right-6 text-slate-200 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Icons.QrCode />
+                  </button>
+                  <div className="mb-4">
+                    <span className={`text-[7px] font-black px-2.5 py-1 rounded-full text-white uppercase tracking-tighter ${rule.provider === 'Amadeus' ? 'bg-[#5D2A8E]' : rule.provider === 'Sabre' ? 'bg-[#E68A5C]' : 'bg-slate-300'}`}>
+                      {rule.provider || '通用 (All GDS)'}
+                    </span>
                   </div>
-                ))}
-             </div>
-          </div>
-        )}
-
-        {activeTab === 'gds' && (
-          <div className="max-w-6xl mx-auto py-10 space-y-10">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-              {/* Amadeus Section */}
-              <div className="p-8 bg-slate-50 rounded-[3rem] border border-slate-100 space-y-6">
-                 <div className="flex items-center gap-4 mb-2">
-                    <div className="w-10 h-10 bg-[#5D2A8E] rounded-xl flex items-center justify-center text-white"><Icons.Plane /></div>
-                    <h4 className="text-xs font-black text-[#5D2A8E] uppercase tracking-widest">Amadeus REST API</h4>
-                 </div>
-                 <div className="space-y-4">
-                    <div className="space-y-1">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Client ID</label>
-                      <input type="text" className="w-full p-4 bg-white rounded-2xl outline-none border border-slate-100 font-bold text-sm focus:border-[#5D2A8E]" value={creds.amadeusClientId || ''} onChange={e => setCreds({...creds, amadeusClientId: e.target.value})} />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">API Secret</label>
-                      <input type="password" placeholder="••••••••" className="w-full p-4 bg-white rounded-2xl outline-none border border-slate-100 font-bold text-sm focus:border-[#5D2A8E]" value={creds.amadeusClientSecret || ''} onChange={e => setCreds({...creds, amadeusClientSecret: e.target.value})} />
-                    </div>
-                 </div>
-              </div>
-
-              {/* Sabre Section */}
-              <div className="p-8 bg-slate-50 rounded-[3rem] border border-slate-100 space-y-6">
-                 <div className="flex items-center gap-4 mb-2">
-                    <div className="w-10 h-10 bg-[#E68A5C] rounded-xl flex items-center justify-center text-white"><Icons.Plane /></div>
-                    <h4 className="text-xs font-black text-[#E68A5C] uppercase tracking-widest">Sabre REST/STL</h4>
-                 </div>
-                 <div className="space-y-4">
-                    <div className="space-y-1">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Bridge / Proxy URL (解決 CORS 必填)</label>
-                      <input type="text" placeholder="http://localhost:8080/api" className="w-full p-4 bg-white rounded-2xl border border-[#A5D8E6] outline-none font-bold text-sm focus:border-[#E68A5C]" value={creds.sabreBridgeUrl || ''} onChange={e => setCreds({...creds, sabreBridgeUrl: e.target.value})} />
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                       <div className="space-y-1">
-                         <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Client ID (V1:...)</label>
-                         <input type="text" className="w-full p-4 bg-white rounded-2xl border border-slate-100 outline-none font-bold text-sm focus:border-[#E68A5C]" value={creds.sabreClientId || ''} onChange={e => setCreds({...creds, sabreClientId: e.target.value})} />
-                       </div>
-                       <div className="space-y-1">
-                         <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Client Secret</label>
-                         <input type="password" placeholder="••••••••" className="w-full p-4 bg-white rounded-2xl border border-slate-100 outline-none font-bold text-sm focus:border-[#E68A5C]" value={creds.sabreClientSecret || ''} onChange={e => setCreds({...creds, sabreClientSecret: e.target.value})} />
-                       </div>
-                    </div>
-                 </div>
-              </div>
-            </div>
-
-            <div className="pt-10 border-t border-slate-100">
-               <button onClick={handleSaveCreds} className="w-full bg-[#5D2A8E] text-white py-6 rounded-[2rem] font-black uppercase tracking-widest text-[11px] shadow-2xl hover:bg-[#E68A5C] transition-all transform active:scale-95">
-                 更新全球 GDS API 連線配置
-               </button>
+                  <p className="text-[10px] font-black text-[#5D2A8E] uppercase tracking-widest">{rule.airlineCode === 'DEFAULT' ? '不限航空公司' : `航司: ${rule.airlineCode}`}</p>
+                  <p className="text-4xl font-black text-slate-900 mt-2 italic">
+                    {rule.markupType === 'percent' ? `+${rule.markupAmount}%` : `+${rule.markupAmount}`}
+                    <span className="text-xs font-bold text-slate-400 not-italic ml-1">{rule.markupType === 'percent' ? '' : 'TWD'}</span>
+                  </p>
+                  <p className="text-[9px] font-bold text-slate-300 uppercase mt-2 tracking-widest">{rule.flightClass}</p>
+                </div>
+              ))}
             </div>
           </div>
         )}
+
+
       </div>
 
       {showAddModal && (
         <div className="fixed inset-0 z-[300] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-white rounded-[3rem] w-full max-w-lg p-10 shadow-2xl animate-in zoom-in-95 duration-300">
-             <h4 className="text-2xl font-black italic uppercase mb-8 text-[#5D2A8E]">Create Rule.</h4>
-             <div className="space-y-6">
+            <h4 className="text-2xl font-black italic uppercase mb-8 text-[#5D2A8E]">Create Rule.</h4>
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">指定供應商 GDS Provider</label>
+                <select className="w-full p-5 bg-slate-50 rounded-2xl font-bold outline-none border border-transparent focus:border-[#5D2A8E] transition-all" value={newRule.provider} onChange={e => setNewRule({ ...newRule, provider: e.target.value })}>
+                  <option value="">通用規則 (All Providers)</option>
+                  <option value="Amadeus">僅限 Amadeus</option>
+                  <option value="Sabre">僅限 Sabre</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">航空公司代碼 (預設請留空)</label>
+                <input type="text" placeholder="例如: BR, CI, CX" className="w-full p-5 bg-slate-50 rounded-2xl font-bold uppercase outline-none border border-transparent focus:border-[#5D2A8E] transition-all" value={newRule.airlineCode} onChange={e => setNewRule({ ...newRule, airlineCode: e.target.value })} />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                   <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">指定供應商 GDS Provider</label>
-                   <select className="w-full p-5 bg-slate-50 rounded-2xl font-bold outline-none border border-transparent focus:border-[#5D2A8E] transition-all" value={newRule.provider} onChange={e => setNewRule({...newRule, provider: e.target.value})}>
-                     <option value="">通用規則 (All Providers)</option>
-                     <option value="Amadeus">僅限 Amadeus</option>
-                     <option value="Sabre">僅限 Sabre</option>
-                   </select>
+                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">加價數值</label>
+                  <input type="number" className="w-full p-5 bg-slate-50 rounded-2xl font-bold outline-none" value={newRule.markupAmount} onChange={e => setNewRule({ ...newRule, markupAmount: Number(e.target.value) })} />
                 </div>
                 <div className="space-y-2">
-                   <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">航空公司代碼 (預設請留空)</label>
-                   <input type="text" placeholder="例如: BR, CI, CX" className="w-full p-5 bg-slate-50 rounded-2xl font-bold uppercase outline-none border border-transparent focus:border-[#5D2A8E] transition-all" value={newRule.airlineCode} onChange={e => setNewRule({...newRule, airlineCode: e.target.value})} />
+                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">計算類型</label>
+                  <select className="w-full p-5 bg-slate-50 rounded-2xl font-bold outline-none" value={newRule.markupType} onChange={e => setNewRule({ ...newRule, markupType: e.target.value as any })}>
+                    <option value="percent">% (比例)</option>
+                    <option value="fixed">TWD (固定)</option>
+                  </select>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                   <div className="space-y-2">
-                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">加價數值</label>
-                     <input type="number" className="w-full p-5 bg-slate-50 rounded-2xl font-bold outline-none" value={newRule.markupAmount} onChange={e => setNewRule({...newRule, markupAmount: Number(e.target.value)})} />
-                   </div>
-                   <div className="space-y-2">
-                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">計算類型</label>
-                     <select className="w-full p-5 bg-slate-50 rounded-2xl font-bold outline-none" value={newRule.markupType} onChange={e => setNewRule({...newRule, markupType: e.target.value as any})}>
-                       <option value="percent">% (比例)</option>
-                       <option value="fixed">TWD (固定)</option>
-                     </select>
-                   </div>
-                </div>
-                <div className="flex gap-4 pt-4">
-                   <button onClick={() => setShowAddModal(false)} className="flex-1 py-5 text-slate-400 font-black uppercase text-[10px] tracking-widest">取消</button>
-                   <button onClick={handleAddRule} className="flex-1 py-5 bg-[#5D2A8E] text-white rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl">保存規則</button>
-                </div>
-             </div>
+              </div>
+              <div className="flex gap-4 pt-4">
+                <button onClick={() => setShowAddModal(false)} className="flex-1 py-5 text-slate-400 font-black uppercase text-[10px] tracking-widest">取消</button>
+                <button onClick={handleAddRule} className="flex-1 py-5 bg-[#5D2A8E] text-white rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl">保存規則</button>
+              </div>
+            </div>
           </div>
         </div>
       )}

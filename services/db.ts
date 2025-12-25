@@ -88,11 +88,11 @@ export const db = {
   getCredentials: (): ApiCredentials => {
     const data = localStorage.getItem(STORAGE_KEYS.CREDS);
     return data ? JSON.parse(data) : {
-      amadeusClientId: 'qGM3LXgATP79zU0Y60408DbewJncWpgk',
-      amadeusClientSecret: 'a57lLlsrTnXvbdZm',
-      sabreClientId: 'V1:hu4s6ans46k2pvbk:DEVCENTER:EXT',
-      sabreClientSecret: '7pLJUxx7',
-      sabreBridgeUrl: 'http://localhost:8080/api' // 保留預設 Bridge URL 範例
+      amadeusClientId: import.meta.env.VITE_AMADEUS_CLIENT_ID || '',
+      amadeusClientSecret: import.meta.env.VITE_AMADEUS_CLIENT_SECRET || '',
+      sabreClientId: import.meta.env.VITE_SABRE_CLIENT_ID || '',
+      sabreClientSecret: import.meta.env.VITE_SABRE_CLIENT_SECRET || '',
+      sabreBridgeUrl: import.meta.env.VITE_SABRE_BRIDGE_URL || 'http://localhost:8080/sabreapibridge'
     };
   },
 

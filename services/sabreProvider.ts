@@ -8,8 +8,8 @@ export const sabreProvider = {
   generateRequestId: () => `SABRE-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
 
   getBaseUrl: () => {
-    const creds = db.getCredentials();
-    return creds.sabreBridgeUrl || OFFICIAL_BASE_URL;
+    // FORCE CORRECT URL FOR DEBUGGING
+    return 'http://localhost:8080/sabreapibridge/api';
   },
 
   getToken: async () => {
@@ -21,7 +21,7 @@ export const sabreProvider = {
     const encoded = btoa(`${creds.sabreClientId}:${creds.sabreClientSecret}`);
 
     try {
-      const response = await fetch(`${baseUrl}/v1/auth/token`, {
+      const response = await fetch(`${baseUrl}/v2/auth/token`, {
         method: 'POST',
         headers: {
           'Authorization': `Basic ${encoded}`,
