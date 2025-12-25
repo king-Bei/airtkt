@@ -6,5 +6,6 @@
 /Users/king-bei/airtkt-1/SabreRESTJavaBridge-master/App/src/main/java/com/cometari/sabreapibridge/services/SabreAPIService.java
 /Users/king-bei/airtkt-1/SabreRESTJavaBridge-master/App/src/main/java/com/cometari/sabreapibridge/domain/AccessToken.java
 /Users/king-bei/airtkt-1/SabreRESTJavaBridge-master/App/src/main/java/com/cometari/sabreapibridge/domain/Airport.java
+/Users/king-bei/airtkt-1/SabreRESTJavaBridge-master/App/src/main/java/com/cometari/sabreapibridge/filters/SimpleCORSFilter.java
 /Users/king-bei/airtkt-1/SabreRESTJavaBridge-master/App/src/main/java/com/cometari/sabreapibridge/config/Oauth2Config.java
 /Users/king-bei/airtkt-1/SabreRESTJavaBridge-master/App/src/main/java/com/cometari/sabreapibridge/config/WebAppInitializer.java

@@ -49,7 +49,7 @@ public class MainController {
 		return sabreAPIService.getRequest(redirectURL);
 	}
 	
-	@RequestMapping(value="api/**", method = RequestMethod.POST, headers = {"Content-type=application/json"})
+	@RequestMapping(value="api/**", method = RequestMethod.POST)
 	public @ResponseBody ResponseEntity<?> postMethod(HttpServletRequest request, HttpEntity<?> requestBody) throws IOException {		
 		log.info("Incoming POST Request: " + request.getRequestURL()+request.getQueryString());
 		String redirectURL = request.getServletPath().toString()+"?"+request.getQueryString();
