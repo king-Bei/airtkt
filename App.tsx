@@ -173,8 +173,8 @@ const App: React.FC = () => {
               <Icons.Plane />
             </div>
             <div className="flex flex-col">
-              <span className="text-lg md:text-2xl font-black text-[#5D2A8E] leading-none tracking-tighter">鑫囍探索旅行</span>
-              <span className="text-[8px] md:text-[10px] font-bold text-[#E68A5C] uppercase tracking-[0.3em] mt-1">JOLLIFY TRAVEL</span>
+              <span className="text-lg md:text-2xl font-black text-[#5D2A8E] leading-none tracking-tighter">FILTTKT</span>
+              <span className="text-[8px] md:text-[10px] font-bold text-[#E68A5C] uppercase tracking-[0.3em] mt-1">FILTKT TRAVEL</span>
             </div>
           </div>
           <div className="flex items-center gap-4 md:gap-8">
